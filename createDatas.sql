@@ -100,3 +100,31 @@ INSERT INTO complexes_rooms(complexeId, roomId)
 VALUES (@complexeID, @rooms_1_ID),
        (@complexeID, @rooms_2_ID),
        (@complexeID, @rooms_3_ID);
+
+# Création des tarifs
+INSERT INTO Tarifs (id, description, price)
+VALUES (UUID(), 'Adultes', 12),
+       (UUID(), 'Enfants', 9),
+       (UUID(), 'Pass Culture', 10);
+
+# Création de Clients
+INSERT INTO Customers(id, name, address, email)
+VALUES (UUID(), 'Doe', 'Unknow Street', 'Doe@email.com'),
+       (UUID(), 'Jane', 'Rue de l\'inconnue', 'Jane@email.com'),
+       (UUID(), 'Jon', 'WallStreet', 'Jon@email.com');
+
+# Création des Films & Séances
+INSERT INTO Films(id, name, description, duration)
+VALUES (UUID(),
+        'Alors on Danse',
+        'Bien décidée à reprendre sa vie en main après avoir découvert les infidélités de son mari, Sandra se réfugie chez sa sœur Danie. A l\'opposé l\'une de l\'autre, elles se retrouvent autour de leur passion commune :....',
+        87),
+       (UUID(),
+        'Notre-Dame Brûle',
+        'Le long métrage de Jean-Jacques Annaud, reconstitue heure par heure l\'invresemblable rélité des évènements du 15 avril 2019 lorsque ...',
+        110),
+       (UUID(),
+        'Le temps des secrets',
+        'Marseille, juillet 1905. Le jeune Marcel Pagnol vient d\'achever ses études primaires, ....',
+        107);
+
