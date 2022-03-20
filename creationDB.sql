@@ -77,7 +77,7 @@ CREATE TABLE Complexes_Rooms
 );
 # Relation Films <-> Rooms
 ALTER TABLE Rooms
-    ADD filmId VARCHAR(36) NOT NULL,
+    ADD filmId VARCHAR(36),
     ADD FOREIGN KEY (filmId) REFERENCES Films (id);
 #Relation Films <-> Séances
 ALTER TABLE Seances
