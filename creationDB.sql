@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS Rooms
     id          VARCHAR(36) NOT NULL PRIMARY KEY,
     number      INTEGER     NOT NULL,
     seatNumner  INTEGER     NOT NULL,
-    description VARCHAR(255)
+    description VARCHAR(255),
+    complexeId  VARCHAR(36) NOT NULL,
+    FOREIGN KEY (complexeId) REFERENCES Complexes (id)
 );
 CREATE TABLE IF NOT EXISTS Seances
 (
@@ -66,15 +68,6 @@ CREATE TABLE IF NOT EXISTS Customers
 ALTER TABLE Administrators
     ADD complexId VARCHAR(36),
     ADD FOREIGN KEY (complexId) REFERENCES Complexes (id);
-# Relation Complexes <-> Rooms
-CREATE TABLE Complexes_Rooms
-(
-    complexeId VARCHAR(36) NOT NULL,
-    roomId     VARCHAR(36) NOT NULL,
-    PRIMARY KEY (complexeId, roomId),
-    FOREIGN KEY (complexeId) REFERENCES Complexes (id),
-    FOREIGN KEY (roomId) REFERENCES Rooms (id)
-);
 # Relation Films <-> Rooms
 ALTER TABLE Rooms
     ADD filmId VARCHAR(36),
@@ -99,6 +92,7 @@ CREATE TABLE IF NOT EXISTS tarif_reservation
 (
     tarifId       VARCHAR(36) NOT NULL,
     reservationId VARCHAR(36),
+    nbrPlace      INTEGER     NOT NULL,
     PRIMARY KEY (tarifId, reservationId),
     FOREIGN KEY (tarifId) REFERENCES Tarifs (id),
     FOREIGN KEY (reservationId) REFERENCES Reservations (id)

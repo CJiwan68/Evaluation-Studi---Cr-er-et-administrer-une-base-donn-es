@@ -40,66 +40,44 @@ VALUES (UUID(),
         false,
         @complexeID);
 
-# Création des salles & liens avec les complexes
-INSERT INTO Rooms(id, number, seatNumner, description)
-VALUES (UUID(),
-        1,
-        150,
-        'Salle 3D'),
-       (UUID(),
-        2,
-        250,
-        'Salle IMAX'),
-       (UUID(),
-        3,
-        100,
-        'Salle ICE'),
-       (UUID(),
-        4,
-        100,
-        'Salle Standard'),
-       (UUID(),
-        5,
-        350,
-        'Grande salle 3D');
-
-# Liaison salles <-> Complexes
-# Récupération des ID des salles
-SELECT @rooms_1_ID := id
-FROM Rooms
-WHERE Rooms.number = 1;
-SELECT @rooms_2_ID := id
-FROM Rooms
-WHERE Rooms.number = 2;
-SELECT @rooms_3_ID := id
-FROM Rooms
-WHERE Rooms.number = 3;
-SELECT @rooms_4_ID := id
-FROM Rooms
-WHERE Rooms.number = 4;
-SELECT @rooms_5_ID := id
-FROM Rooms
-WHERE Rooms.number = 5;
-# Récupération ID du 1er complexe
+# Création des salles & liens avec les complexes pour le 1er Complexe
 SELECT @complexeID := id
 FROM Complexes
 WHERE Complexes.name = 'CGR Turckheim';
-# Création des liaisons
-INSERT INTO complexes_rooms (complexeId, roomId)
-VALUES (@complexeID, @rooms_1_ID),
-       (@complexeID, @rooms_2_ID),
-       (@complexeID, @rooms_3_ID),
-       (@complexeID, @rooms_4_ID),
-       (@complexeID, @rooms_5_ID);
-# Récupération ID du 2eme complexe
+INSERT INTO Rooms(id, number, seatNumner, description, complexeId)
+VALUES (UUID(),
+        1,
+        150,
+        'Salle 3D', @complexeID),
+       (UUID(),
+        4,
+        100,
+        'Salle Standard', @complexeID);
+# Création des salles & liens avec les complexes pour le 2eme Complexe
 SELECT @complexeID := id
 FROM Complexes
 WHERE Complexes.name = 'CGR Colmar';
-# Création des liaisons
-INSERT INTO complexes_rooms(complexeId, roomId)
-VALUES (@complexeID, @rooms_1_ID),
-       (@complexeID, @rooms_2_ID),
-       (@complexeID, @rooms_3_ID);
+INSERT INTO Rooms(id, number, seatNumner, description, complexeId)
+VALUES (UUID(),
+        1,
+        150,
+        'Salle 3D', @complexeID),
+       (UUID(),
+        2,
+        250,
+        'Salle IMAX', @complexeID),
+       (UUID(),
+        3,
+        100,
+        'Salle ICE', @complexeID),
+       (UUID(),
+        4,
+        100,
+        'Salle Standard', @complexeID),
+       (UUID(),
+        5,
+        350,
+        'Grande salle', @complexeID);
 
 # Création des tarifs
 INSERT INTO Tarifs (id, description, price)
@@ -128,3 +106,96 @@ VALUES (UUID(),
         'Marseille, juillet 1905. Le jeune Marcel Pagnol vient d\'achever ses études primaires, ....',
         107);
 
+# Création des séances pour 'Alors on Danse'
+# Récupération de l'ID du film
+SELECT @filmID := id
+FROM Films
+WHERE Films.name = 'Alors on Danse'
+LIMIT 1;
+INSERT INTO Seances(id, startTime, filmId)
+VALUES (UUID(), TIME('11:00:00'), @filmID),
+       (UUID(), TIME('13:55:00'), @filmID),
+       (UUID(), TIME('16:00:00'), @filmID),
+       (UUID(), TIME('20:10:00'), @filmID);
+# Création des séances pour 'Notre-Dame Brûle'
+# Récupération de l'ID du film
+SELECT @filmID := id
+FROM Films
+WHERE Films.name = 'Notre-Dame Brûle'
+LIMIT 1;
+INSERT INTO Seances(id, startTime, filmId)
+VALUES (UUID(), TIME('10:50:00'), @filmID),
+       (UUID(), TIME('13:30:00'), @filmID),
+       (UUID(), TIME('15:50:00'), @filmID),
+       (UUID(), TIME('18:05:00'), @filmID),
+       (UUID(), TIME('20:20:00'), @filmID),
+       (UUID(), TIME('22:10:00'), @filmID);
+# Création des séances pour 'Le temps des secrets'
+# Récupération de l'ID du film
+SELECT @filmID := id
+FROM Films
+WHERE Films.name = 'Le temps des secrets'
+LIMIT 1;
+INSERT INTO Seances(id, startTime, filmId)
+VALUES (UUID(), TIME('21:00:00'), @filmID);
+
+# Affectation des films aux salles
+# Films Alors on Danse - Projeté uniquement à Colmar dans la salle 'Grande salle'
+SELECT @filmID := id
+FROM Films
+WHERE Films.name = 'Alors on Danse'
+LIMIT 1;
+SELECT @complexeID := id
+FROM Complexes
+WHERE Complexes.name = 'CGR Colmar'
+LIMIT 1;
+UPDATE Rooms
+SET filmId = @filmID
+WHERE Rooms.description = 'Grande salle'
+  AND Rooms.complexeId = @complexeID;
+# Films 'Notre-Dame Brûle' projeté dans toutes les salles 3D et salle Ice (Colmar & Turckheim)
+SELECT @filmID := id
+FROM Films
+WHERE Films.name = 'Notre-Dame Brûle'
+LIMIT 1;
+UPDATE Rooms
+SET filmId = @filmID
+WHERE Rooms.description = 'Salle 3D'
+   OR Rooms.description = 'Salle ICE';
+# Films 'Le temps des secrets' projeté uniquement dans les salles standard (Colmar & Turckheim)
+SELECT @filmID := id
+FROM Films
+WHERE Films.name = 'Le temps des secrets'
+LIMIT 1;
+UPDATE Rooms
+SET filmId = @filmID
+WHERE Rooms.description = 'Salle Standard';
+
+# Création de réservations
+# Pour Doe : Alors on Danse à 13:55:00 à Colmar dans la salle 'Grande Salle'
+# 2 Adultes - 1 Enfants
+SELECT @customerID := id
+FROM Customers
+WHERE Customers.name = 'Doe';
+SELECT @complexeID := id
+FROM Complexes
+WHERE Complexes.name = 'CGR Colmar';
+SELECT @filmID := id
+FROM Films
+WHERE Films.name = 'Alors on Danse';
+SELECT @roomID = id
+FROM Rooms
+WHERE Rooms.complexeId = @complexeID
+  AND Rooms.filmId = @filmID;
+SELECT @seanceID := id
+FROM Seances
+WHERE Seances.startTime = TIME('13:55:00')
+  AND Seances.filmId = @filmID;
+INSERT INTO reservations(id, prePaid, isPaid, roomId, seanceId, customerId)
+VALUES (UUID(),
+        false,
+        true,
+        @roomID,
+        @seanceID,
+        @customerID);
+SELECT LAST_INSERT_ID();
