@@ -183,19 +183,67 @@ WHERE Complexes.name = 'CGR Colmar';
 SELECT @filmID := id
 FROM Films
 WHERE Films.name = 'Alors on Danse';
-SELECT @roomID = id
+SELECT @roomID := id
 FROM Rooms
-WHERE Rooms.complexeId = @complexeID
-  AND Rooms.filmId = @filmID;
+WHERE Rooms.complexeId = @complexeID AND Rooms.filmId = @filmID;
 SELECT @seanceID := id
 FROM Seances
 WHERE Seances.startTime = TIME('13:55:00')
   AND Seances.filmId = @filmID;
-INSERT INTO reservations(id, prePaid, isPaid, roomId, seanceId, customerId)
-VALUES (UUID(),
+INSERT INTO Reservations(date, prePaid, isPaid, roomId, seanceId, customerId)
+VALUES (DATE('2022-03-26'),
         false,
         true,
         @roomID,
         @seanceID,
         @customerID);
-SELECT LAST_INSERT_ID();
+SELECT @lastResaID := LAST_INSERT_ID();
+#Ajout des tarifs sélectionné avec le nbr de place.
+#Récupération des ID des tarifs
+SELECT @adulteID := id FROM Tarifs WHERE Tarifs.description = 'Adultes';
+SELECT @enfantID := id FROM Tarifs WHERE Tarifs.description = 'Enfants';
+INSERT INTO tarif_reservation (tarifId, reservationId, nbrPlace)
+VALUES (@adulteID, @lastResaID, 2),
+       (@enfantID, @lastResaID, 1);
+
+SELECT @nbrSiege := seatNumner FROM Rooms WHERE Rooms.id = @roomID;
+SELECT SUM(nbrPlace) FROM tarif_reservation
+    INNER JOIN Reservations ON Reservations.roomId = @roomID AND Reservations.seanceId = @seanceID AND Reservations.date = DATE('2022-03-26');
+
+# Pour Jane : Alors on Danse à 13:55:00 à Colmar dans la salle 'Grande Salle'
+# 1 Adultes - 3 Enfants
+SELECT @customerID := id
+FROM Customers
+WHERE Customers.name = 'Jane';
+SELECT @complexeID := id
+FROM Complexes
+WHERE Complexes.name = 'CGR Colmar';
+SELECT @filmID := id
+FROM Films
+WHERE Films.name = 'Alors on Danse';
+SELECT @roomID := id
+FROM Rooms
+WHERE Rooms.complexeId = @complexeID AND Rooms.filmId = @filmID;
+SELECT @seanceID := id
+FROM Seances
+WHERE Seances.startTime = TIME('13:55:00')
+  AND Seances.filmId = @filmID;
+INSERT INTO Reservations(date, prePaid, isPaid, roomId, seanceId, customerId)
+VALUES (DATE('2022-03-25'),
+        false,
+        true,
+        @roomID,
+        @seanceID,
+        @customerID);
+SELECT @lastResaID := LAST_INSERT_ID();
+#Ajout des tarifs sélectionné avec le nbr de place.
+#Récupération des ID des tarifs
+SELECT @adulteID := id FROM Tarifs WHERE Tarifs.description = 'Adultes';
+SELECT @enfantID := id FROM Tarifs WHERE Tarifs.description = 'Enfants';
+INSERT INTO tarif_reservation (tarifId, reservationId, nbrPlace)
+VALUES (@adulteID, @lastResaID, 1),
+       (@enfantID, @lastResaID, 3);
+
+SELECT @nbrSiege := seatNumner FROM Rooms WHERE Rooms.id = @roomID;
+SELECT DISTINCT  * FROM tarif_reservation
+    JOIN Reservations ON Reservations.roomId = @roomID AND Reservations.seanceId = @seanceID AND Reservations.date = DATE('2022-03-26');

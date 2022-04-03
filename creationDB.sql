@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS Tarifs
 );
 CREATE TABLE IF NOT EXISTS Reservations
 (
-    id      VARCHAR(36) NOT NULL PRIMARY KEY,
+    id     INTEGER AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    date    DATE        NOT NULL ,
     prePaid BOOLEAN     NOT NULL,
     isPaid  BOOLEAN     NOT NULL
 );
@@ -91,7 +92,7 @@ ALTER TABLE Reservations
 CREATE TABLE IF NOT EXISTS tarif_reservation
 (
     tarifId       VARCHAR(36) NOT NULL,
-    reservationId VARCHAR(36),
+    reservationId INTEGER,
     nbrPlace      INTEGER     NOT NULL,
     PRIMARY KEY (tarifId, reservationId),
     FOREIGN KEY (tarifId) REFERENCES Tarifs (id),
